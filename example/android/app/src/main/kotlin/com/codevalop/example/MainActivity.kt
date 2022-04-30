@@ -1,4 +1,4 @@
-package com.codevalop.raw_sound_example
+package com.codevalop.example
 
 import io.flutter.embedding.android.FlutterActivity
 

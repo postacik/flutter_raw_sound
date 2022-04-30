@@ -5,6 +5,7 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
+import android.os.Build
 import androidx.annotation.NonNull
 import io.flutter.Log
 import kotlinx.coroutines.*
@@ -61,7 +62,17 @@ class RawSoundPlayer(@NonNull androidContext: Context, @NonNull bufferSize: Int,
                 .setChannelMask(if (nChannels == 1) AudioFormat.CHANNEL_OUT_MONO else AudioFormat.CHANNEL_OUT_STEREO)
                 .build()
         Log.i(TAG, "Create audio track w/ bufferSize: $bufferSize, sampleRate: ${format.sampleRate}, encoding: ${format.encoding}, nChannels: ${format.channelCount}")
-        audioTrack = AudioTrack(attributes, format, bufferSize, AudioTrack.MODE_STREAM, sessionId)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioTrack = AudioTrack.Builder()
+                .setAudioAttributes(attributes)
+                .setAudioFormat(format)
+                .setBufferSizeInBytes(bufferSize)
+                .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+                .setSessionId(sessionId)
+                .build()
+        } else {
+            audioTrack = AudioTrack(attributes, format, bufferSize, AudioTrack.PERFORMANCE_MODE_LOW_LATENCY, sessionId)
+        }
         Log.i(TAG, "sessionId: ${audioTrack.audioSessionId}, bufferCapacityInFrames: ${audioTrack.bufferCapacityInFrames}, bufferSizeInFrames: ${audioTrack.bufferSizeInFrames}")
     }
 
